@@ -37,9 +37,12 @@ async def generate_player_info_img(platform: str, platform_uid: int, game_mode: 
             osu_player_history_info = await UserOsuInfoHistory.get(
                 osu_uid=user.osu_uid, game_mode=game_mode, date=compare_date
             )
-            # todo: 获取对比玩家的分数, 如果没查询到则试图查询最早的记录
         except DoesNotExist:
-            osu_player_history_info = None
+            try:
+                osu_player_history_info = await (UserOsuInfoHistory.filter(osu_uid=user.osu_uid, game_mode=game_mode)
+                                                 .order_by("date").first())
+            except DoesNotExist:
+                osu_player_history_info = None
     else:
         osu_player_history_info = None
 
