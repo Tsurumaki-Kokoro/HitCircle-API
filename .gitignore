@@ -1,0 +1,7 @@
+.venv
+.idea
+
+logs/**
+
+app/cache/beatmap/osu_file/**
+app/cache/user/**
