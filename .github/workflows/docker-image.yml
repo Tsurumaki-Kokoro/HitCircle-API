@@ -9,7 +9,7 @@ on:
 
 env:
   DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-  IMAGE_NAME: HitCircleAPI
+  IMAGE_NAME: hit-circle-api
 
 jobs:
   build-and-push:
