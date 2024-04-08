@@ -1,0 +1,32 @@
+name: Auto tag to release
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  auto-tag-on-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Extract version from main.py
+        run: |
+          VERSION=$(grep 'version=' main.py | cut -d'"' -f2)
+          echo "EXTRACTED_VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Set up Git user
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@gtihub.com'
+
+      - name: Tagging
+        run: |
+          VERSION=${{ env.EXTRACTED_VERSION }}
+          git tag "v$VERSION"
+          git push origin "v$VERSION"
