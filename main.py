@@ -8,6 +8,7 @@ from slowapi.middleware import SlowAPIMiddleware
 from loguru import logger
 
 from app.user.api import user_router, limiter
+from app.config.settings import *
 from app.api.api_v1.endpoints.docs import docs_router
 from app.api.api_v1.endpoints.beatmap import beatmap_router
 from app.api.api_v1.endpoints.score import score_router
@@ -26,11 +27,11 @@ TORTOISE_ORM = {
         "default": {
             "engine": "tortoise.backends.mysql",
             "credentials": {
-                "host": "localhost",
-                "port": "3306",
-                "user": "root",
-                "password": "yxh200004",
-                "database": "hitcircleapi_dev"
+                "host": DB_HOST,
+                "port": DB_PORT,
+                "user": DB_USER,
+                "password": DB_PASSWORD,
+                "database": "hitcircleapi"
             }
         }
     },

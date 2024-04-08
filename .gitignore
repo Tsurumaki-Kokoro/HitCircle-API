@@ -1,6 +1,8 @@
 .venv
 .idea
 
+__pycache__/
+
 logs/**
 
 app/cache/beatmap/osu_file/**
