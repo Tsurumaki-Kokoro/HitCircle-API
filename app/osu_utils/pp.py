@@ -2,7 +2,7 @@ import math
 from pathlib import Path
 
 from ossapi import Score
-from rosu_pp_py import PerformanceAttributes, Beatmap, Calculator
+from rosu_pp_py import PerformanceAttributes, Beatmap, Performance, GameMode
 
 
 class PPCalculator:
@@ -25,33 +25,40 @@ class PPCalculator:
         """
         beatmap = Beatmap(path=str(self.osu_file_path))
         mods = self.score.mods.value
+        if self.score.mode_int == 0:
+            mode = GameMode.Osu
+        elif self.score.mode_int == 1:
+            mode = GameMode.Taiko
+        elif self.score.mode_int == 2:
+            mode = GameMode.Catch
+        else:
+            mode = GameMode.Mania
+        beatmap.convert(mode)
         if self.score.mode_int == 2:
-            c = Calculator(
-                acc=self.score.accuracy * 100,
+            c = Performance(
+                accuracy=self.score.accuracy * 100,
                 n_katu=self.score.statistics.count_katu,
                 combo=self.score.max_combo,
-                n_misses=self.score.statistics.count_miss,
+                misses=self.score.statistics.count_miss,
                 n100=self.score.statistics.count_100,
                 n300=self.score.statistics.count_300,
                 mods=mods,
-                mode=self.score.mode_int
             )
 
         else:
-            c = Calculator(
-                acc=self.score.accuracy * 100,
-                n_katu=self.score.statistics.count_katu,
-                n_geki=self.score.statistics.count_geki,
+            c = Performance(
+                accuracy=self.score.accuracy * 100,
+                n_katu=self.score.statistics.count_katu if self.score.statistics.count_katu else 0,
+                n_geki=self.score.statistics.count_geki if self.score.statistics.count_geki else 0,
                 combo=self.score.max_combo,
-                n_misses=self.score.statistics.count_miss,
-                n50=self.score.statistics.count_50,
-                n100=self.score.statistics.count_100,
-                n300=self.score.statistics.count_300,
+                misses=self.score.statistics.count_miss if self.score.statistics.count_miss else 0,
+                n50=self.score.statistics.count_50 if self.score.statistics.count_50 else 0,
+                n100=self.score.statistics.count_100 if self.score.statistics.count_100 else 0,
+                n300=self.score.statistics.count_300 if self.score.statistics.count_300 else 0,
                 mods=mods,
-                mode=self.score.mode_int
             )
 
-        return c.performance(beatmap)
+        return c.calculate(beatmap)
 
     def if_pp_ss_pp_info(self) -> tuple[float, float] | tuple[str, str]:
         """
@@ -60,19 +67,27 @@ class PPCalculator:
         """
         beatmap = Beatmap(path=str(self.osu_file_path))
         mods = self.score.mods.value
-        c = Calculator(
-            acc=self.score.accuracy * 100,
-            n_katu=self.score.statistics.count_katu,
-            n_geki=self.score.statistics.count_geki,
-            n50=self.score.statistics.count_50,
-            n100=self.score.statistics.count_100,
+        if self.score.mode_int == 0:
+            mode = GameMode.Osu
+        elif self.score.mode_int == 1:
+            mode = GameMode.Taiko
+        elif self.score.mode_int == 2:
+            mode = GameMode.Catch
+        else:
+            mode = GameMode.Mania
+        beatmap.convert(mode)
+        c = Performance(
+            accuracy=self.score.accuracy * 100,
+            n_katu=self.score.statistics.count_katu if self.score.statistics.count_katu else 0,
+            n_geki=self.score.statistics.count_geki if self.score.statistics.count_geki else 0,
+            n50=self.score.statistics.count_50 if self.score.statistics.count_50 else 0,
+            n100=self.score.statistics.count_100 if self.score.statistics.count_100 else 0,
             n300=self.score.statistics.count_300 + self.score.statistics.count_miss,
             mods=mods,
-            mode=self.score.mode_int,
         )
-        if_pp = c.performance(beatmap).pp
-        c = Calculator(acc=100, mods=mods, mode=self.score.mode_int)
-        ss_pp = c.performance(beatmap).pp
+        if_pp = c.calculate(beatmap).pp
+        c = Performance(accuracy=100, mods=mods)
+        ss_pp = c.calculate(beatmap).pp
         if math.isnan(if_pp):
             return "nan", "nan"
         return if_pp, ss_pp
@@ -84,12 +99,20 @@ class PPCalculator:
         """
         beatmap = Beatmap(path=str(self.osu_file_path))
         mods = self.score.mods.value
-        c = Calculator(
-            acc=100,
+        if self.score.mode_int == 0:
+            mode = GameMode.Osu
+        elif self.score.mode_int == 1:
+            mode = GameMode.Taiko
+        elif self.score.mode_int == 2:
+            mode = GameMode.Catch
+        else:
+            mode = GameMode.Mania
+        beatmap.convert(mode)
+        c = Performance(
+            accuracy=100,
             mods=mods,
-            mode=self.score.mode_int
         )
-        return c.performance(beatmap)
+        return c.calculate(beatmap)
 
 
 def get_ss_pp_info(osu_file_path: Path, mode: int, mods: int) -> PerformanceAttributes:
@@ -101,9 +124,17 @@ def get_ss_pp_info(osu_file_path: Path, mode: int, mods: int) -> PerformanceAttr
     :return:
     """
     beatmap = Beatmap(path=str(osu_file_path))
-    c = Calculator(
-        acc=100,
+    if mode == 0:
+        mode = GameMode.Osu
+    elif mode == 1:
+        mode = GameMode.Taiko
+    elif mode == 2:
+        mode = GameMode.Catch
+    else:
+        mode = GameMode.Mania
+    beatmap.convert(mode)
+    c = Performance(
+        accuracy=100,
         mods=mods,
-        mode=mode
     )
-    return c.performance(beatmap)
+    return c.calculate(beatmap)
