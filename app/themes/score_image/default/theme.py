@@ -125,7 +125,7 @@ class DefaultTheme(ThemeStrategy):
         # star_rating
         star_rating = pp_calculate.pp_info().difficulty.stars
         color = (255, 204, 34, 255)
-        diff_len = int(250 * star_rating / 10) if star_rating <= 10 else 250
+        diff_len = max(int(250 * star_rating / 10) if star_rating <= 10 else 250, 0)
         diff_len = Image.new('RGBA', (diff_len, 8), color)
         im.alpha_composite(diff_len, (1190, 446))
         draw.text((1470, 450), f'{star_rating:.2f}', font=Harmony_Sans_Bold_20, anchor='mm')
