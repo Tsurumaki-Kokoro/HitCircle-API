@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from PIL import Image, ImageDraw
 
 
@@ -72,3 +74,31 @@ def draw_fillet(img: Image.Image, radii: int = 20) -> Image.Image:
     # 白色区域透明可见，黑色区域不可见
     img.putalpha(alpha)
     return img
+
+
+def draw_rounded_rectangle(draw: ImageDraw.Draw, xy: Tuple[Tuple[int, int], Tuple[int, int]],
+                           corner_radius: int, fill: str = None, outline: str = None) -> None:
+    upper_left_point = xy[0]
+    bottom_right_point = xy[1]
+
+    # 计算矩形的四个角的坐标
+    top_left = (upper_left_point[0], upper_left_point[1])
+    top_right = (bottom_right_point[0], upper_left_point[1])
+    bottom_left = (upper_left_point[0], bottom_right_point[1])
+    bottom_right = (bottom_right_point[0], bottom_right_point[1])
+
+    # 绘制四个角的四分之一圆
+    draw.pieslice([top_left, (top_left[0] + corner_radius * 2, top_left[1] + corner_radius * 2)],
+                  start=180, end=270, fill=fill)
+    draw.pieslice([(top_right[0] - corner_radius * 2, top_right[1]),
+                   (top_right[0], top_right[1] + corner_radius * 2)], start=270, end=360, fill=fill)
+    draw.pieslice([(bottom_left[0], bottom_left[1] - corner_radius * 2),
+                   (bottom_left[0] + corner_radius * 2, bottom_left[1])], start=90, end=180, fill=fill)
+    draw.pieslice([(bottom_right[0] - corner_radius * 2, bottom_right[1] - corner_radius * 2),
+                   (bottom_right[0], bottom_right[1])], start=0, end=90, fill=fill)
+
+    # 绘制矩形填充四个圆角之间的空间
+    draw.rectangle([top_left[0] + corner_radius, top_left[1],
+                    bottom_right[0] - corner_radius, bottom_right[1]], fill=fill)
+    draw.rectangle([top_left[0], top_left[1] + corner_radius,
+                    bottom_right[0], bottom_right[1] - corner_radius], fill=fill)
