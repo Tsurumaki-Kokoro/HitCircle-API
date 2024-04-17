@@ -14,6 +14,7 @@ from app.api.api_v1.endpoints.beatmap import beatmap_router
 from app.api.api_v1.endpoints.score import score_router
 from app.api.api_v1.endpoints.user_info import info_router
 from app.api.api_v1.endpoints.task import task_router
+from app.api.api_v1.endpoints.multiplayer import multiplayer_router
 
 app = FastAPI(title="HitCircle API", version="1.0.1")
 logger.add("logs/{time:YYYY-MM-DD}.log", rotation="1 day", retention="7 days", level="DEBUG")
@@ -55,6 +56,7 @@ app.include_router(user_router)
 app.include_router(beatmap_router)
 app.include_router(score_router)
 app.include_router(info_router)
+app.include_router(multiplayer_router)
 app.include_router(task_router)
 
 app.state.limiter = limiter
