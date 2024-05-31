@@ -18,7 +18,7 @@ async def generate_match_history_img(mp_id: int, theme: str = "default"):
 
     while match_info.events[0].detail.type != MatchEventType.MATCH_CREATED:
         logger.debug(f"Match Created not found, trying to get previous events")
-        before_match_info = osu_api.match(match_id=mp_id, before=match_info.events[0].id)
+        before_match_info = osu_api.match(match_id=mp_id, before_id=match_info.events[0].id)
         if not before_match_info:
             raise HTTPException(status_code=404, detail="No match found")
         match_info.events = before_match_info.events + match_info.events
@@ -40,7 +40,7 @@ async def generate_rating_img(mp_id: int, algorithm: str, theme: str = "default"
 
     while match_info.events[0].detail.type != MatchEventType.MATCH_CREATED:
         logger.debug(f"Match Created not found, trying to get previous events")
-        before_match_info = osu_api.match(match_id=mp_id, before=match_info.events[0].id)
+        before_match_info = osu_api.match(match_id=mp_id, before_id=match_info.events[0].id)
         if not before_match_info:
             raise HTTPException(status_code=404, detail="No match found")
         match_info.events = before_match_info.events + match_info.events
