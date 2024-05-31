@@ -1,5 +1,7 @@
 import math
+import numpy as np
 from pathlib import Path
+from typing import List
 
 from ossapi import Score
 from rosu_pp_py import PerformanceAttributes, Beatmap, Performance, GameMode
@@ -138,3 +140,63 @@ def get_ss_pp_info(osu_file_path: Path, mode: int, mods: int) -> PerformanceAttr
         mods=mods,
     )
     return c.calculate(beatmap)
+
+
+def find_optimal_new_pp(current_pp_list: list[float], desired_pp_increase: float) -> tuple[float, int]:
+    """
+    Find the optimal new PP to achieve a desired PP increase given a list of current PP values.
+
+    :param current_pp_list: List of current PP values (list of floats)
+    :param desired_pp_increase: Desired increase in total PP (float)
+    :return: Tuple of the optimal new PP and the position at which it will be placed
+    """
+
+    def calculate_total_pp(pp_list: list[float]) -> float:
+        """
+        计算 osu! 的总 PP。
+
+        参数:
+        pp_list (list[float]): 一个包含每个分数 PP 的列表。
+
+        返回:
+        float: 总 PP 值。
+        """
+        weights = np.array([0.95 ** i for i in range(len(pp_list))], dtype=float)
+        total_pp = np.sum(np.array(pp_list, dtype=float) * weights)
+        return total_pp
+
+    if len(current_pp_list) < 100:
+        current_pp_list.append(desired_pp_increase)
+        current_pp_list.sort(reverse=True)
+        return desired_pp_increase, current_pp_list.index(desired_pp_increase) + 1
+
+    total_pp = calculate_total_pp(current_pp_list)
+    current_pp_list.sort(reverse=True)
+    bp_100 = current_pp_list[99]
+
+    # 使用二分查找来寻找最优的新 PP 值
+    low, high = bp_100, bp_100 + desired_pp_increase + 100
+    optimal_new_pp = high
+
+    while low <= high:
+        mid = (low + high) / 2
+        new_pp_list = current_pp_list[:]
+        new_pp_list.append(mid)
+        new_pp_list.sort(reverse=True)
+        new_pp_list.pop()
+        new_total_pp = calculate_total_pp(new_pp_list)
+
+        if new_total_pp - total_pp >= desired_pp_increase:
+            optimal_new_pp = mid
+            high = mid - 0.01
+        else:
+            low = mid + 0.01
+
+    # 计算 optimal_new_pp 在新排序列表中的位置
+    new_pp_list = current_pp_list[:]
+    new_pp_list.append(optimal_new_pp)
+    new_pp_list.sort(reverse=True)
+    position = new_pp_list.index(optimal_new_pp) + 1
+
+    return optimal_new_pp, position
+

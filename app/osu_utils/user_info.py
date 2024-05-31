@@ -1,12 +1,14 @@
 from datetime import datetime, timedelta
 
-from fastapi import HTTPException, Response
+from fastapi import HTTPException, Response, UploadFile
 from loguru import logger
 from tortoise.exceptions import DoesNotExist
 
 from app.config.settings import osu_api
 from app.draw.user_info import UserInfoImageStrategy
 from app.osu_utils.user import game_mode_int_to_string
+from app.osu_utils.file import cache_dir
+from app.osu_utils.pp import find_optimal_new_pp
 from app.user.models import UserModel, UserOsuInfoHistory
 
 
@@ -91,3 +93,52 @@ async def save_user_info(uid: str, game_mode: int):
         )
 
 
+async def update_user_info_background(platform: str, platform_uid: int, file: UploadFile) -> dict:
+    try:
+        user = await UserModel.get(platform=platform, platform_uid=platform_uid)
+    except DoesNotExist:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # 保存背景图片
+    path = cache_dir / "user" / f"{user.osu_uid}"
+    if not path.exists():
+        path.mkdir(parents=True, exist_ok=True)
+    file_name = "info.png"
+    with open((path / file_name), "wb") as f:
+        f.write(await file.read())
+
+    return {"message": "Background updated successfully"}
+
+
+async def generate_player_pp_control_result(platform: str, platform_uid: int, pp: float):
+    # 获取用户信息
+    try:
+        user = await UserModel.get(platform_uid=platform_uid, platform=platform)
+    except DoesNotExist:
+        raise HTTPException(status_code=404, detail="User not found")
+    user_info = osu_api.user(user.osu_uid)
+
+    params = {
+        "user_id": user_info.id,
+        "mode": game_mode_int_to_string(user.game_mode),
+        "type": "best",
+        "limit": 100,
+        "offset": 0,
+    }
+
+    try:
+        logger.info(f"Getting best 100 play record for user {user_info.username}")
+        play_records = osu_api.user_scores(**params)
+    except ValueError as e:
+        logger.error(f"Error when getting play record: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+
+    if len(play_records) == 0:
+        raise HTTPException(status_code=404, detail="No play record found")
+
+    pp_list = []
+    for record in play_records:
+        pp_list.append(record.pp)
+    required_pp = find_optimal_new_pp(pp_list, pp)
+
+    return {"required_pp": required_pp}
