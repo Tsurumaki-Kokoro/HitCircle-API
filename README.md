@@ -11,14 +11,14 @@ HitCircle API 是一个基于 FastAPI 的 机器人后端 API 项目，用于提
 - [x] 跨平台绑定 osu! 用户
 - [x] 查询 osu! 用户信息
 - [x] 查询 osu! 用户最近游玩记录（包含 Failed）
-- [x] 查询 osu! 用户BP记录、单图成绩
+- [x] 查询 osu! 用户BP记录、单图成绩、BP分析
 - [x] 查询 osu! Beatmap、Beatmapset 信息
+- [x] 查询 osu! Multiplayer 比赛总结
 
 ## 即将实现功能
 - [ ] 群组 osu! 用户排行榜
 - [ ] 查询并重新计算 osu! 用户成绩(无 Choke)
 - [ ] 查询比对其他用户的 osu! 数据、成绩
-- [ ] 查询 osu! Multiplayer 比赛总结
 - [ ] 查询 osu! 实时跟踪 Multiplayer 比赛信息
 
 ## 项目部署
