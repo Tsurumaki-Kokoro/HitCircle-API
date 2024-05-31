@@ -33,6 +33,7 @@ class DefaultTheme(ThemeStrategy):
         # 判断比赛的队伍类型
         team_type_list = []
         invalid_user_list = []
+        appeared_user_list = []
         for game in game_history:
             team_type_list.append(game.team_type)
         team_type = mode(team_type_list)
@@ -42,11 +43,16 @@ class DefaultTheme(ThemeStrategy):
             # 移除无效用户
             for game in game_history:
                 for entry in game.scores:
+                    appeared_user_list.append(entry.user_id)
                     if entry.score == 0:
+                        appeared_user_list.remove(entry.user_id)
                         invalid_user_list.append(entry.user_id)
                 for entry in game.scores:
                     if entry.user_id in invalid_user_list:
                         game.scores.remove(entry)
+            for user in match_info.users:
+                if user.id not in appeared_user_list:
+                    match_info.users.remove(user)
             # 移除无效游戏
             for game in game_history:
                 if len(game.scores) != analyzed_result["team_size"] * 2:
