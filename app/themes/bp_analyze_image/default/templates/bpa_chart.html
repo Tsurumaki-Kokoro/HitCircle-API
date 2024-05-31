@@ -1,0 +1,166 @@
+<head>
+    <meta charset="UTF-8">
+    <title>Awesome-pyecharts</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+</head>
+<body>
+<div id="1" class="chart-container" style="width:900px; height:500px; "></div>
+<script>
+  const chart = echarts.init(
+    document.getElementById('1'), 'white', {renderer: 'canvas'}
+  );
+  const option = {
+    animation: false,
+    legend: [{
+      data: ['pp', 'time']
+    },
+      {
+        data: ['XH', 'X', 'SH', 'S', 'A', 'B', 'C', 'D'],
+        top: 'bottom'
+      }
+    ],
+    xAxis: [
+      {
+        type: 'category',
+        data: Array.from({length: 100}, (_, i) => i),
+        axisLabel: {
+          interval: 9
+        }
+      }
+    ],
+    yAxis: [
+      {
+        type: 'value',
+        name: 'pp',
+        scale: true,
+        axisLabel: {
+          formatter: '{value} pp'
+        }
+      },
+      {
+        type: 'value',
+        name: 'time',
+        min: 0,
+        alignTicks: true,
+        axisLabel: {
+          formatter: function (value, index) {
+            const date = new Date(value * 1000);
+            const minute = date.getMinutes();
+            const seconds = date.getSeconds();
+            if (seconds.toString().length === 1)
+              return minute + ':' + '0' + seconds;
+            return minute + ':' + seconds;
+          }
+        }
+      }
+    ],
+    series: [
+      {
+        name: 'pp',
+        symbol: 'none',
+        type: 'line',
+        data: {{ pp_ls }},
+        markPoint: {
+          data: [
+            {type: 'max', name: 'Max'},
+            {type: 'min', name: 'Min'}
+          ]
+        },
+        markLine: {
+          data: [{type: 'average', name: 'Avg', symbol: 'arrow'}],
+          label: {position: 'start', formatter: '{c} pp'},
+
+        }
+      },
+      {
+        name: 'time',
+        type: 'bar',
+        yAxisIndex: 1,
+        data: {{ length_ls }}
+      },
+      {
+        name: 'XH',
+        type: 'candlestick',
+        yAxisIndex: 1,
+        data: [],
+        itemStyle: {
+          color: '#c7eaf5',
+          borderColor: '#b4ffff',
+        }
+      },
+      {
+        name: 'X',
+        type: 'candlestick',
+        yAxisIndex: 1,
+        data: [],
+        itemStyle: {
+          color: '#ffc83a',
+          borderColor: '#ffff00',
+        }
+      },
+      {
+        name: 'SH',
+        type: 'candlestick',
+        yAxisIndex: 1,
+        data: [],
+        itemStyle: {
+          color: '#c7eaf5',
+          borderColor: 'transparent'
+        }
+      },
+      {
+        name: 'S',
+        type: 'candlestick',
+        yAxisIndex: 1,
+        data: [],
+        itemStyle: {
+          color: '#ffc83a',
+          borderColor: 'transparent'
+        }
+      },
+      {
+        name: 'A',
+        type: 'candlestick',
+        yAxisIndex: 1,
+        data: [],
+        itemStyle: {
+          color: '#84d61c',
+          borderColor: 'transparent'
+
+        }
+      },
+      {
+        name: 'B',
+        type: 'candlestick',
+        yAxisIndex: 1,
+        data: [],
+        itemStyle: {
+          color: '#e9b941',
+          borderColor: 'transparent'
+        }
+      },
+      {
+        name: 'C',
+        type: 'candlestick',
+        yAxisIndex: 1,
+        data: [],
+        itemStyle: {
+          color: '#fa8a59',
+          borderColor: 'transparent'
+        }
+      },
+      {
+        name: 'D',
+        type: 'candlestick',
+        yAxisIndex: 1,
+        data: [],
+        itemStyle: {
+          color: '#f55757',
+          borderColor: 'transparent'
+        }
+      }
+    ]
+  };
+  chart.setOption(option);
+</script>
+</body>

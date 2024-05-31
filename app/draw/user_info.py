@@ -29,3 +29,23 @@ class UserInfoImageStrategy:
             raise e
 
         return processed_data
+
+
+class UserBPAnalyzeImageStrategy:
+    def __init__(self, user_info: User, user_scores: List[Score]) -> None:
+        self._themes = discover_and_load_themes('bp_analyze_image')
+        self._user_info = user_info
+        self._user_scores = user_scores
+
+    async def apply_theme(self, theme_name: str = 'default') -> bytes:
+        theme_strategy = self._themes.get(theme_name)
+        if not theme_strategy:
+            logger.error(f"Theme {theme_name} not found, using default theme")
+            theme_strategy = self._themes.get('default')
+
+        try:
+            processed_data = await theme_strategy.process_data(self._user_info, self._user_scores)
+        except Exception as e:
+            raise e
+
+        return processed_data

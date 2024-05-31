@@ -5,7 +5,7 @@ from loguru import logger
 from tortoise.exceptions import DoesNotExist
 
 from app.config.settings import osu_api
-from app.draw.user_info import UserInfoImageStrategy
+from app.draw.user_info import UserInfoImageStrategy, UserBPAnalyzeImageStrategy
 from app.osu_utils.user import game_mode_int_to_string
 from app.osu_utils.file import cache_dir
 from app.osu_utils.pp import find_optimal_new_pp
@@ -142,3 +142,39 @@ async def generate_player_pp_control_result(platform: str, platform_uid: int, pp
     required_pp = find_optimal_new_pp(pp_list, pp)
 
     return {"required_pp": required_pp}
+
+
+async def generate_player_pp_analyze_img(platform: str, platform_uid: int, theme: str):
+    # 获取用户信息
+    try:
+        user = await UserModel.get(platform_uid=platform_uid, platform=platform)
+    except DoesNotExist:
+        raise HTTPException(status_code=404, detail="User not found")
+    user_info = osu_api.user(user.osu_uid)
+
+    params = {
+        "user_id": user_info.id,
+        "mode": game_mode_int_to_string(user.game_mode),
+        "type": "best",
+        "limit": 100,
+        "offset": 0,
+    }
+
+    try:
+        logger.info(f"Getting best 100 play record for user {user_info.username}")
+        play_records = osu_api.user_scores(**params)
+    except ValueError as e:
+        logger.error(f"Error when getting play record: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+
+    if len(play_records) == 0:
+        raise HTTPException(status_code=404, detail="No play record found")
+
+    # try:
+    illustration = UserBPAnalyzeImageStrategy(user_info, play_records)
+    image = await illustration.apply_theme(theme)
+    # except Exception as e:
+    #     logger.error(f"An error occurred while generating user info image: {e}")
+    #     raise HTTPException(status_code=500, detail=f"Internal server error: {e}")
+
+    return Response(content=image, media_type="image/jpeg")

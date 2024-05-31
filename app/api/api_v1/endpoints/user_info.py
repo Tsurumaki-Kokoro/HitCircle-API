@@ -6,7 +6,8 @@ from slowapi.util import get_remote_address
 from starlette.requests import Request
 
 from app.api.api_v1.schemas.user_info import UserInfoUpdateSchema
-from app.osu_utils.user_info import generate_player_info_img, update_user_info_background, generate_player_pp_control_result
+from app.osu_utils.user_info import (generate_player_info_img, update_user_info_background,
+                                     generate_player_pp_control_result, generate_player_pp_analyze_img)
 from app.security.api_key import get_api_key
 
 info_router = APIRouter(tags=["Player Info"])
@@ -47,3 +48,14 @@ async def update_background(request: Request, data: str = Form(...), background_
 }, dependencies=[Depends(get_api_key)])
 async def get_performance_control_result(request: Request, platform: str, platform_uid: int, pp: float):
     return await generate_player_pp_control_result(platform, platform_uid, pp)
+
+
+@info_router.get("/user_info/extra/performance_analyze", responses={
+    200: {"description": "OK"},
+    400: {"description": "Bad request"},
+    403: {"description": "Access Token required or invalid"},
+    404: {"description": "User not found"},
+    500: {"description": "Internal server error"}
+}, dependencies=[Depends(get_api_key)])
+async def get_performance_analyze_result(request: Request, platform: str, platform_uid: int, theme: str = 'default'):
+    return await generate_player_pp_analyze_img(platform, platform_uid, theme)
