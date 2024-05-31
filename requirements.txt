@@ -12,3 +12,6 @@ pillow~=10.2.0
 numpy~=1.26.4
 matplotlib~=3.8.3
 pytz~=2024.1
+python-multipart~=0.0.9
+Jinja2~=3.1.4
+pyppeteer~=2.0.0
