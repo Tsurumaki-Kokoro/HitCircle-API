@@ -12,7 +12,17 @@ async def html_to_image(html_content, width, height):
         tmp_path = tmp.name
 
     # 启动浏览器并生成图片
-    browser = await launch()
+    browser = await launch({
+        'headless': True,
+        'args': [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-infobars',
+            '--window-size=1920,1080',
+            '--disable-extensions',
+            '--disable-dev-shm-usage'
+        ]
+    })
     page = await browser.newPage()
     await page.setViewport({'width': width, 'height': height})
     await page.goto(f'file://{tmp_path}')
