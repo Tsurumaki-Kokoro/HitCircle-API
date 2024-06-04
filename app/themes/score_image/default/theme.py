@@ -200,7 +200,7 @@ class DefaultTheme(ThemeStrategy):
                 (840, 645), f"{pp_calculate.pp_info().pp_speed:.0f}", font=Harmony_Sans_Bold_30, anchor="mm"
             )
             draw.text(
-                (960, 645), f"{pp_calculate.pp_info().pp_acc:.0f}", font=Harmony_Sans_Bold_30, anchor="mm"
+                (960, 645), f"{pp_calculate.pp_info().pp_accuracy:.0f}", font=Harmony_Sans_Bold_30, anchor="mm"
             )
             draw.text(
                 (1157, 550),
