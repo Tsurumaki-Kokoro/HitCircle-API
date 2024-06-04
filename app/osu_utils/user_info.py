@@ -170,11 +170,11 @@ async def generate_player_pp_analyze_img(platform: str, platform_uid: int, theme
     if len(play_records) == 0:
         raise HTTPException(status_code=404, detail="No play record found")
 
-    # try:
-    illustration = UserBPAnalyzeImageStrategy(user_info, play_records)
-    image = await illustration.apply_theme(theme)
-    # except Exception as e:
-    #     logger.error(f"An error occurred while generating user info image: {e}")
-    #     raise HTTPException(status_code=500, detail=f"Internal server error: {e}")
+    try:
+        illustration = UserBPAnalyzeImageStrategy(user_info, play_records)
+        image = await illustration.apply_theme(theme)
+    except Exception as e:
+        logger.error(f"An error occurred while generating user info image: {e}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {e}")
 
     return Response(content=image, media_type="image/jpeg")
