@@ -10,7 +10,7 @@ from app.osu_utils.user import game_mode_int_to_string
 from app.user.models import UserModel
 
 
-async def generate_play_record_img(platform: str, platform_uid: int,
+async def generate_play_record_img(platform: str, platform_uid: str,
                                    record_type: str, game_mode: int = None,
                                    include_fails: bool = False, theme: str = "default",
                                    best_index: int = None):
@@ -72,7 +72,7 @@ async def generate_play_record_img(platform: str, platform_uid: int,
     return Response(content=image, media_type="image/jpeg")
 
 
-async def generate_user_score_img(platform: str, platform_uid: int, beatmap_id: int,
+async def generate_user_score_img(platform: str, platform_uid: str, beatmap_id: int,
                                   mods: str = None, theme: str = "default"):
     # 获取用户信息
     try:

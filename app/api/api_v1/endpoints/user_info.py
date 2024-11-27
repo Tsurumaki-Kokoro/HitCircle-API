@@ -21,7 +21,7 @@ limiter = Limiter(key_func=get_remote_address)
     404: {"description": "User not found"},
     500: {"description": "Internal server error"}
 }, dependencies=[Depends(get_api_key)])
-async def get_user_info(request: Request, platform: str, platform_uid: int, game_mode: int = None,
+async def get_user_info(request: Request, platform: str, platform_uid: str, game_mode: int = None,
                         compare_with: int = None):
     return await generate_player_info_img(platform, platform_uid, game_mode, compare_with)
 
@@ -46,7 +46,7 @@ async def update_background(request: Request, data: str = Form(...), background_
     404: {"description": "User not found"},
     500: {"description": "Internal server error"}
 }, dependencies=[Depends(get_api_key)])
-async def get_performance_control_result(request: Request, platform: str, platform_uid: int, pp: float):
+async def get_performance_control_result(request: Request, platform: str, platform_uid: str, pp: float):
     return await generate_player_pp_control_result(platform, platform_uid, pp)
 
 
@@ -57,5 +57,5 @@ async def get_performance_control_result(request: Request, platform: str, platfo
     404: {"description": "User not found"},
     500: {"description": "Internal server error"}
 }, dependencies=[Depends(get_api_key)])
-async def get_performance_analyze_result(request: Request, platform: str, platform_uid: int, theme: str = 'default'):
+async def get_performance_analyze_result(request: Request, platform: str, platform_uid: str, theme: str = 'default'):
     return await generate_player_pp_analyze_img(platform, platform_uid, theme)

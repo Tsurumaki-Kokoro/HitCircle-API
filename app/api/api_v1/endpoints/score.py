@@ -17,7 +17,7 @@ limiter = Limiter(key_func=get_remote_address)
     404: {"description": "User not found or No recent play record found"},
     500: {"description": "Internal server error"}
 }, dependencies=[Depends(get_api_key)])
-async def get_recent_play_img(request: Request, platform: str, platform_uid: int, game_mode: int = None,
+async def get_recent_play_img(request: Request, platform: str, platform_uid: str, game_mode: int = None,
                               include_fails: bool = False, theme: str = "default"):
     return await generate_play_record_img(platform, platform_uid, "recent", game_mode, include_fails, theme)
 
@@ -29,7 +29,7 @@ async def get_recent_play_img(request: Request, platform: str, platform_uid: int
     404: {"description": "User not found or No best play record found"},
     500: {"description": "Internal server error"}
 }, dependencies=[Depends(get_api_key)])
-async def get_best_play_img(request: Request, platform: str, platform_uid: int, best_index: int = 1,
+async def get_best_play_img(request: Request, platform: str, platform_uid: str, best_index: int = 1,
                             game_mode: int = None, theme: str = "default"):
     return await generate_play_record_img(platform, platform_uid, "best", game_mode, False, theme, best_index)
 
@@ -41,6 +41,6 @@ async def get_best_play_img(request: Request, platform: str, platform_uid: int, 
     404: {"description": "User not found"},
     500: {"description": "Internal server error"}
 }, dependencies=[Depends(get_api_key)])
-async def get_user_score_img(request: Request, platform: str, platform_uid: int, beatmap_id: int, mods: str = None,
+async def get_user_score_img(request: Request, platform: str, platform_uid: str, beatmap_id: int, mods: str = None,
                              theme: str = "default"):
     return await generate_user_score_img(platform, platform_uid, beatmap_id, mods, theme)

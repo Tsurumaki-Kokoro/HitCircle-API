@@ -12,7 +12,7 @@ from app.osu_utils.pp import find_optimal_new_pp
 from app.user.models import UserModel, UserOsuInfoHistory
 
 
-async def generate_player_info_img(platform: str, platform_uid: int, game_mode: int = None, compare_with: int = None,
+async def generate_player_info_img(platform: str, platform_uid: str, game_mode: int = None, compare_with: int = None,
                                    theme: str = "default"):
     # 获取用户信息
     try:
@@ -93,7 +93,7 @@ async def save_user_info(uid: str, game_mode: int):
         )
 
 
-async def update_user_info_background(platform: str, platform_uid: int, file: UploadFile) -> dict:
+async def update_user_info_background(platform: str, platform_uid: str, file: UploadFile) -> dict:
     try:
         user = await UserModel.get(platform=platform, platform_uid=platform_uid)
     except DoesNotExist:
@@ -110,7 +110,7 @@ async def update_user_info_background(platform: str, platform_uid: int, file: Up
     return {"message": "Background updated successfully"}
 
 
-async def generate_player_pp_control_result(platform: str, platform_uid: int, pp: float):
+async def generate_player_pp_control_result(platform: str, platform_uid: str, pp: float):
     # 获取用户信息
     try:
         user = await UserModel.get(platform_uid=platform_uid, platform=platform)
@@ -144,7 +144,7 @@ async def generate_player_pp_control_result(platform: str, platform_uid: int, pp
     return {"required_pp": required_pp}
 
 
-async def generate_player_pp_analyze_img(platform: str, platform_uid: int, theme: str):
+async def generate_player_pp_analyze_img(platform: str, platform_uid: str, theme: str):
     # 获取用户信息
     try:
         user = await UserModel.get(platform_uid=platform_uid, platform=platform)
