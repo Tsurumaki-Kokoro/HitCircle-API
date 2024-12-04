@@ -59,7 +59,10 @@ class DefaultTheme(ThemeStrategy):
         mapper_pp = mapper_pp[: 10]
         users = []
         for i in mapper_pp:
-            users.append(osu_api.user(i[0], mode="osu", key="id"))
+            try:
+                users.append(osu_api.user(i[0], mode="osu", key="id"))
+            except ValueError:
+                continue
         user_dic = {i.id: i.username for i in users}
         mapper_pp_data = []
         for mapper, pp in mapper_pp:
