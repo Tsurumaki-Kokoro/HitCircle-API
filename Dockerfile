@@ -12,7 +12,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 RUN pip install uvicorn[standard]
 
-RUN pip install pip install tortoise-orm[asyncmy]
+RUN pip install tortoise-orm[asyncmy]
 
 RUN apt-get update && apt-get install -y wget xvfb libxss1 libappindicator1
 
