@@ -8,6 +8,7 @@ from typing import Union, List
 from fastapi import HTTPException, Response
 from loguru import logger
 from ossapi import User, Score, Mod
+from ossapi.models import NonLegacyMod
 
 from app.config.settings import osu_api
 from app.network.network import get_first_response
@@ -149,16 +150,16 @@ def get_bg_filename(file: Union[bytes, Path]) -> str:
     return "mapbg.png"
 
 
-def calculate_circle_size(circle_size: float, mod) -> float:
+def calculate_circle_size(circle_size: float, mod: List[NonLegacyMod]) -> float:
     """
     计算 CS
     :param circle_size:
     :param mod:
     :return:
     """
-    if Mod.HR in mod:
+    if any(m.acronym == "HR" for m in mod):
         circle_size = min(circle_size * 1.3, 10)
-    elif Mod.EZ in mod:
+    elif any(m.acronym == "EZ" for m in mod):
         circle_size = min(circle_size * 0.5, 10)
 
     return circle_size
@@ -171,9 +172,9 @@ def calculate_hp(hp: float, mod) -> float:
     :param mod:
     :return:
     """
-    if Mod.HR in mod:
+    if any(m.acronym == "HR" for m in mod):
         hp = min(hp * 1.4, 10)
-    elif Mod.EZ in mod:
+    elif any(m.acronym == "EZ" for m in mod):
         hp = min(hp * 0.5, 10)
 
     return hp
@@ -186,9 +187,9 @@ def calculate_bpm(bpm: float, mod) -> float:
     :param mod: 游玩 Mod
     :return:
     """
-    if Mod.DT in mod:
+    if any(m.acronym == "DT" for m in mod):
         bpm = bpm * 1.5
-    elif Mod.HT in mod:
+    elif any(m.acronym == "HT" for m in mod):
         bpm = bpm * 0.75
 
     return bpm
@@ -201,9 +202,9 @@ def calculate_length(length: int, mod) -> str:
     :param mod:
     :return:
     """
-    if Mod.DT in mod:
+    if any(m.acronym == "DT" for m in mod):
         length = int(length / 1.5)
-    elif Mod.HT in mod:
+    elif any(m.acronym == "HT" for m in mod):
         length = int(length / 0.75)
 
     length_str = f"{length // 60}:{length % 60:02d}"
@@ -226,7 +227,7 @@ async def get_info_img(beatmap_id: int, beatmapset_id: int, theme: str):
         if not beatmap_info:
             raise HTTPException(status_code=400, detail="Bad request")
         osu_file_path = await get_osu_file_path(beatmap_info.beatmapset().id, beatmap_info.id)
-        ss_pp_info = get_ss_pp_info(osu_file_path, beatmap_info.mode_int, 0)
+        ss_pp_info = get_ss_pp_info(osu_file_path, beatmap_info.ruleset_id, 0)
         mapper_info = osu_api.user(beatmap_info.beatmapset().user_id)
         bg_name = get_bg_filename(osu_file_path)
         map_bg = await get_map_bg(set_id=beatmap_info.beatmapset().id, map_id=beatmap_info.id, bg_name=bg_name)

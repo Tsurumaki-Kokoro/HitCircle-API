@@ -29,7 +29,7 @@ class DefaultTheme(ThemeStrategy):
         processed_bg = await preprocess_bg(map_bg)
         im.alpha_composite(processed_bg, (0, 0))
         # 绘制layout
-        if beatmap_info.mode_int == 3:
+        if beatmap_info.rule_set in {3, 7}:
             layout = Image.open(ManiaMapBg).convert("RGBA")
         else:
             layout = Image.open(MapBg).convert("RGBA")

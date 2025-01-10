@@ -50,13 +50,13 @@ def draw_stars_diff(stars: float) -> Image.Image:
 
 def draw_acc(img: Image.Image, score: Score) -> Image.Image:
     acc = score.accuracy * 100
-    mode = score.mode.name.lower()
+    mode = score.ruleset_id
     size = [acc, 100 - acc]
-    if mode == "osu":
+    if mode in {0, 4, 8}:
         in_size = [60, 20, 7, 7, 5, 1]
-    elif mode == "taiko":
+    elif mode in {1, 5}:
         in_size = [60, 20, 5, 5, 4, 1]
-    elif mode == "fruits":
+    elif mode in {2, 6}:
         in_size = [85, 5, 4, 4, 1, 1]
     else:
         in_size = [70, 10, 10, 5, 4, 1]

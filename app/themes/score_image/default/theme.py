@@ -2,7 +2,7 @@ from io import BytesIO
 from typing import Union
 
 from PIL import Image, ImageDraw, ImageSequence
-from ossapi.models import DifficultyAttributes, User, Score, Mod
+from ossapi.models import DifficultyAttributes, User, Score, NonLegacyMod
 
 from app.draw.flags import get_region_flag
 from app.osu_utils.beatmap import calculate_circle_size, calculate_hp, calculate_bpm, calculate_length
@@ -31,11 +31,11 @@ class DefaultTheme(ThemeStrategy):
         map_bg = preprocess_bg(map_bg)
         im.alpha_composite(map_bg, (0, 0))
         # 绘制layout
-        mode_image_path = get_layout_image(present_play_record.mode_int)
+        mode_image_path = get_layout_image(present_play_record.ruleset_id)
         mode_image = Image.open(mode_image_path).convert("RGBA")
         im.alpha_composite(mode_image, (0, 0))
         # 绘制模式图标
-        draw.text((75, 75), IconLs[present_play_record.mode.name.lower()], font=EXTRA_30, anchor="lt")
+        draw.text((75, 75), IconLs[present_play_record.ruleset_id], font=EXTRA_30, anchor="lt")
         # 难度星星
         stars_bg = draw_stars_diff(pp_calculate.pp_info().difficulty.stars)
         stars_img = stars_bg.resize((85, 37))
@@ -52,13 +52,16 @@ class DefaultTheme(ThemeStrategy):
                   fill=color
                   )
         # 绘制mod图标
-        if present_play_record.mods.short_name() != 'NM':
-            for i, mod in enumerate(present_play_record.mods.decompose()):
-                mod_img_path = get_mod_image(mod.short_name())
-                mod_img = Image.open(mod_img_path).convert("RGBA")
-                im.alpha_composite(mod_img, (500 + 50 * i, 160))
+        if present_play_record.mods:
+            for i, mod in enumerate(present_play_record.mods):
+                mod_img_path = get_mod_image(mod.acronym)
+                try:
+                    mod_img = Image.open(mod_img_path).convert("RGBA")
+                    im.alpha_composite(mod_img, (500 + 50 * i, 160))
+                except FileNotFoundError:
+                    pass
         # 绘制rank图标
-        if Mod.Hidden in present_play_record.mods.decompose():
+        if any(i in present_play_record.mods for i in (NonLegacyMod(acronym="HD"), NonLegacyMod(acronym="FL"), NonLegacyMod(acronym="FI"))):
             ranking = ["XH", "SH", "A", "B", "C", "D", "F"]
         else:
             ranking = ["X", "S", "A", "B", "C", "D", "F"]
@@ -90,17 +93,17 @@ class DefaultTheme(ThemeStrategy):
             im.alpha_composite(supporter_img.resize((40, 40)), (250, 640))
 
         # cs, ar, od, hp
-        if present_play_record.mode.name.lower() == "osu":
+        if present_play_record.ruleset_id in {0, 4, 8}:
             map_diff = [
-                calculate_circle_size(present_play_record.beatmap.cs, present_play_record.mods.decompose()),
-                calculate_hp(present_play_record.beatmap.drain, present_play_record.mods.decompose()),
+                calculate_circle_size(present_play_record.beatmap.cs, present_play_record.mods),
+                calculate_hp(present_play_record.beatmap.drain, present_play_record.mods),
                 difficulty_attributes.overall_difficulty,
                 difficulty_attributes.approach_rate,
             ]
         else:
             map_diff = [
-                calculate_circle_size(present_play_record.beatmap.cs, present_play_record.mods.decompose()),
-                calculate_hp(present_play_record.beatmap.drain, present_play_record.mods.decompose()),
+                calculate_circle_size(present_play_record.beatmap.cs, present_play_record.mods),
+                calculate_hp(present_play_record.beatmap.drain, present_play_record.mods),
                 present_play_record.beatmap.accuracy,
                 present_play_record.beatmap.ar,
             ]
@@ -131,8 +134,8 @@ class DefaultTheme(ThemeStrategy):
         draw.text((1470, 450), f'{star_rating:.2f}', font=Harmony_Sans_Bold_20, anchor='mm')
         # 时长 - 滑条
         diff_info = (
-            calculate_length(present_play_record.beatmap.total_length, present_play_record.mods.decompose()),
-            calculate_bpm(present_play_record.beatmap.bpm, present_play_record.mods.decompose()),
+            calculate_length(present_play_record.beatmap.total_length, present_play_record.mods),
+            calculate_bpm(present_play_record.beatmap.bpm, present_play_record.mods),
             present_play_record.beatmap.count_circles,
             present_play_record.beatmap.count_sliders,
         )
@@ -168,12 +171,12 @@ class DefaultTheme(ThemeStrategy):
         # 评价
         draw.text((316, 307), present_play_record.rank.name, font=VENERA_75, anchor="mm")
         # 分数
-        draw.text((498, 251), f"{present_play_record.score:,}", font=Harmony_Sans_Bold_75, anchor="lm")
+        draw.text((498, 251), f"{present_play_record.legacy_total_score or present_play_record.total_score:,}", font=Harmony_Sans_Bold_75, anchor="lm")
         # 时间
         draw.text((498, 341), "达成时间:", font=Harmony_Sans_Bold_20, anchor="lm")
         draw.text(
             (630, 341),
-            present_play_record.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+            present_play_record.ended_at.strftime("%Y-%m-%d %H:%M:%S"),
             font=Harmony_Sans_Bold_20,
             anchor="lm"
         )
@@ -189,7 +192,7 @@ class DefaultTheme(ThemeStrategy):
             anchor="lm",
         )
         # 右下pp
-        if present_play_record.mode.name.lower() == "osu":
+        if present_play_record.ruleset_id in {0, 4, 8}:
             draw.text((720, 550), f"{pp_calculate.if_pp_ss_pp_info()[1]:.0f}", font=Harmony_Sans_Bold_30, anchor="mm")
             draw.text((840, 550), f"{pp_calculate.if_pp_ss_pp_info()[0]:.0f}", font=Harmony_Sans_Bold_30, anchor="mm")
             draw.text((960, 550), f"{pp_calculate.pp_info().pp:.0f}", font=Harmony_Sans_Bold_30, anchor="mm")
@@ -216,29 +219,29 @@ class DefaultTheme(ThemeStrategy):
             )
             draw.text(
                 (1100, 645),
-                f"{present_play_record.statistics.count_300}",
+                f"{present_play_record.statistics.great or 0}",
                 font=Harmony_Sans_Bold_30,
                 anchor="mm",
             )
             draw.text(
                 (1214, 645),
-                f"{present_play_record.statistics.count_100}",
+                f"{present_play_record.statistics.ok or 0}",
                 font=Harmony_Sans_Bold_30,
                 anchor="mm",
             )
             draw.text(
                 (1328, 645),
-                f"{present_play_record.statistics.count_50}",
+                f"{present_play_record.statistics.meh or 0}",
                 font=Harmony_Sans_Bold_30,
                 anchor="mm",
             )
             draw.text(
                 (1442, 645),
-                f"{present_play_record.statistics.count_miss}",
+                f"{present_play_record.statistics.miss or 0}",
                 font=Harmony_Sans_Bold_30,
                 anchor="mm",
             )
-        elif present_play_record.mode.name.lower() == "taiko":
+        elif present_play_record.ruleset_id in {1, 5}:
             draw.text(
                 (1118, 550),
                 f"{present_play_record.accuracy * 100:.2f}%",
@@ -256,23 +259,23 @@ class DefaultTheme(ThemeStrategy):
             )
             draw.text(
                 (1118, 645),
-                f"{present_play_record.statistics.count_300}",
+                f"{present_play_record.statistics.great or 0}",
                 font=Harmony_Sans_Bold_30,
                 anchor="mm",
             )
             draw.text(
                 (1270, 645),
-                f"{present_play_record.statistics.count_100}",
+                f"{present_play_record.statistics.ok or 0}",
                 font=Harmony_Sans_Bold_30,
                 anchor="mm",
             )
             draw.text(
                 (1420, 645),
-                f"{present_play_record.statistics.count_miss}",
+                f"{present_play_record.statistics.miss or 0}",
                 font=Harmony_Sans_Bold_30,
                 anchor="mm",
             )
-        elif present_play_record.mode.name.lower() == "catch":
+        elif present_play_record.ruleset_id in {2, 6}:
             draw.text(
                 (1083, 550),
                 f"{present_play_record.accuracy * 100:.2f}%",
@@ -293,33 +296,33 @@ class DefaultTheme(ThemeStrategy):
             )
             draw.text(
                 (1062, 645),
-                f"{present_play_record.statistics.count_300}",
+                f"{present_play_record.statistics.great or 0}",
                 font=Harmony_Sans_Bold_30,
                 anchor="mm",
             )
             draw.text(
                 (1185, 645),
-                f"{present_play_record.statistics.count_100}",
+                f"{present_play_record.statistics.large_tick_hit or 0}",
                 font=Harmony_Sans_Bold_30,
                 anchor="mm",
             )
             draw.text(
                 (1309, 645),
-                f"{present_play_record.statistics.count_katu}",
+                f"{present_play_record.statistics.small_tick_miss or 0}",
                 font=Harmony_Sans_Bold_30,
                 anchor="mm",
             )
             draw.text(
                 (1432, 645),
-                f"{present_play_record.statistics.count_miss}",
+                f"{present_play_record.statistics.miss or 0}",
                 font=Harmony_Sans_Bold_30,
                 anchor="mm",
             )
         else:
             draw.text(
                 (1002, 580),
-                f"{present_play_record.statistics.count_geki / present_play_record.statistics.count_300 :.1f}:1"
-                if present_play_record.statistics.count_300 != 0
+                f"{present_play_record.statistics.perfect / present_play_record.statistics.great :.1f}:1"
+                if (present_play_record.statistics.great or 0) != 0
                 else "∞:1",
                 font=Harmony_Sans_Bold_20,
                 anchor="mm",
@@ -341,37 +344,37 @@ class DefaultTheme(ThemeStrategy):
             )
             draw.text(
                 (953, 645),
-                f"{present_play_record.statistics.count_geki}",
+                f"{present_play_record.statistics.perfect}",
                 font=Harmony_Sans_Bold_30,
                 anchor="mm",
             )
             draw.text(
                 (1051, 645),
-                f"{present_play_record.statistics.count_300}",
+                f"{present_play_record.statistics.great}",
                 font=Harmony_Sans_Bold_30,
                 anchor="mm",
             )
             draw.text(
                 (1150, 645),
-                f"{present_play_record.statistics.count_katu}",
+                f"{present_play_record.statistics.good}",
                 font=Harmony_Sans_Bold_30,
                 anchor="mm",
             )
             draw.text(
                 (1249, 645),
-                f"{present_play_record.statistics.count_100}",
+                f"{present_play_record.statistics.ok}",
                 font=Harmony_Sans_Bold_30,
                 anchor="mm",
             )
             draw.text(
                 (1347, 645),
-                f"{present_play_record.statistics.count_50}",
+                f"{present_play_record.statistics.meh}",
                 font=Harmony_Sans_Bold_30,
                 anchor="mm",
             )
             draw.text(
                 (1445, 645),
-                f"{present_play_record.statistics.count_miss}",
+                f"{present_play_record.statistics.miss}",
                 font=Harmony_Sans_Bold_30,
                 anchor="mm",
             )

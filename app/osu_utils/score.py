@@ -51,9 +51,12 @@ async def generate_play_record_img(platform: str, platform_uid: str,
         raise HTTPException(status_code=404, detail=f"No {record_type} play record found")
 
     # 获取 beatmap attributes
+    for item in play_records[0].mods:
+        print(item.acronym)
     beatmap_attributes = osu_api.beatmap_attributes(
         beatmap_id=play_records[0].beatmap.id,
-        mods=play_records[0].mods.value,
+        # Mods 列表排除CL
+        mods=[item.acronym for item in play_records[0].mods if item.acronym != "CL"],
         ruleset=game_mode
     )
     # 获取谱面文件路径, 计算pp

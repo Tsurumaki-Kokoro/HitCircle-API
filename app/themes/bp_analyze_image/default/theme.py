@@ -44,8 +44,8 @@ class DefaultTheme(ThemeStrategy):
             if i.mods == Mod.NM:
                 mods_pp["NM"] += i.pp * 0.95 ** num
             else:
-                for j in i.mods.decompose():
-                    mods_pp[j.short_name()] += i.pp * 0.95 ** num
+                for j in i.mods:
+                    mods_pp[j.acronym] += i.pp * 0.95 ** num
         pp_data = []
         for mod, pp in mods_pp.items():
             pp_data.append({'name': mod, 'value': round(pp, 2)})

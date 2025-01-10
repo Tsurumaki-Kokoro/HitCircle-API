@@ -91,8 +91,8 @@ class PlayerRatingCalculation:
                 if user_info is None:
                     continue
                 if entry.user_id == user_id:
-                    for mod in entry.mods.decompose():
-                        all_played_mods.add(mod)
+                    for mod in entry.mods:
+                        all_played_mods.add(mod.acronym)
                     average_scores.append(sum([entry.score for entry in game.scores]) / len(game.scores))
                     user_scores.append(entry.score)
                     number_of_games_by_user += 1
