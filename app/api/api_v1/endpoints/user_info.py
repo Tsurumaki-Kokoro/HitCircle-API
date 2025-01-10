@@ -21,9 +21,9 @@ limiter = Limiter(key_func=get_remote_address)
     404: {"description": "User not found"},
     500: {"description": "Internal server error"}
 }, dependencies=[Depends(get_api_key)])
-async def get_user_info(request: Request, platform: str, platform_uid: str, game_mode: int = None,
+async def get_user_info(request: Request, platform: str, platform_uid: str, game_mode: int = None, user_name: str = None,
                         compare_with: int = None):
-    return await generate_player_info_img(platform, platform_uid, game_mode, compare_with)
+    return await generate_player_info_img(platform, platform_uid, game_mode, user_name, compare_with)
 
 
 @info_router.post("/user_info/update_background", responses={

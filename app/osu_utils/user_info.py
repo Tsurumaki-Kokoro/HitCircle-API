@@ -12,7 +12,7 @@ from app.osu_utils.pp import find_optimal_new_pp
 from app.user.models import UserModel, UserOsuInfoHistory
 
 
-async def generate_player_info_img(platform: str, platform_uid: str, game_mode: int = None, compare_with: int = None,
+async def generate_player_info_img(platform: str, platform_uid: str, game_mode: int = None, user_name: str = None, compare_with: int = None,
                                    theme: str = "default"):
     # 获取用户信息
     try:
@@ -22,13 +22,19 @@ async def generate_player_info_img(platform: str, platform_uid: str, game_mode: 
 
     # 获取游玩记录
     if not game_mode:
+        game_mode_int = 0
         game_mode = game_mode_int_to_string(user.game_mode)
     else:
+        game_mode_int = game_mode
         game_mode = game_mode_int_to_string(game_mode)
 
     # 获取osu玩家信息
-    logger.info(f"Getting player info for user {user.osu_uid}")
-    osu_player_info = osu_api.user(user=user.osu_uid, mode=game_mode, key="id")
+    if user_name:
+        logger.info(f"Getting player info for user {user_name}")
+        osu_player_info = osu_api.user(user=user_name, mode=game_mode, key="username")
+    else:
+        logger.info(f"Getting player info for user {user.osu_uid}")
+        osu_player_info = osu_api.user(user=user.osu_uid, mode=game_mode, key="id")
     osu_player_scores = osu_api.user_scores(user_id=user.osu_uid, type="best", mode=game_mode, limit=100)
 
     # 获取对比玩家信息
@@ -37,11 +43,11 @@ async def generate_player_info_img(platform: str, platform_uid: str, game_mode: 
         compare_date = now - timedelta(days=compare_with)
         try:
             osu_player_history_info = await UserOsuInfoHistory.get(
-                osu_uid=user.osu_uid, game_mode=game_mode, date=compare_date
+                osu_uid=user.osu_uid, game_mode=game_mode_int, date=compare_date
             )
         except DoesNotExist:
             try:
-                osu_player_history_info = await (UserOsuInfoHistory.filter(osu_uid=user.osu_uid, game_mode=game_mode)
+                osu_player_history_info = await (UserOsuInfoHistory.filter(osu_uid=user.osu_uid, game_mode=game_mode_int)
                                                  .order_by("date").first())
             except DoesNotExist:
                 osu_player_history_info = None
