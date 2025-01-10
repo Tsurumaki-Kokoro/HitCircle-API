@@ -16,7 +16,7 @@ from app.api.api_v1.endpoints.user_info import info_router
 from app.api.api_v1.endpoints.task import task_router
 from app.api.api_v1.endpoints.multiplayer import multiplayer_router
 
-app = FastAPI(title="HitCircle API", version="1.2.4")
+app = FastAPI(title="HitCircle API", version="1.3.0")
 logger.add("logs/{time:YYYY-MM-DD}.log", rotation="1 day", retention="7 days", level="DEBUG")
 app.add_middleware(SlowAPIMiddleware)
 
