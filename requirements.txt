@@ -1,4 +1,4 @@
-fastapi~=0.110.0
+fastapi>=0.115.0
 tortoise-orm~=0.20.0
 slowapi~=0.1.9
 starlette~=0.40.0
