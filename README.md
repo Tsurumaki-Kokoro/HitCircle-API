@@ -1,9 +1,11 @@
-# [HitCircle API](https://github.com/Tsurumaki-Kokoro/HitCircle-API) &middot; [![Licence](https://img.shields.io/github/license/Ileriayo/markdown-badges?style=for-the-badge)](https://github.com/Tsurumaki-Kokoro/HitCircle-API/blob/master/LICENCE) ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) ![GitHub Actions](https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-badge&logo=githubactions&logoColor=white)
+# [HitCircle API](https://github.com/Tsurumaki-Kokoro/HitCircle-API) &middot; [![Licence](https://img.shields.io/github/license/Ileriayo/markdown-badges?style=for-the-badge)](https://github.com/Tsurumaki-Kokoro/HitCircle-API/blob/master/LICENSE)
 
 HitCircle API 是一个基于 FastAPI 的 机器人后端 API 项目，用于提供 osu! 相关的数据查询服务, 并以图片、文字等形式返回。
 
+这个项目已经不再维护，可以移步新版基于 .NET 的项目 [@Tsurumaki-Kokoro/MintAPI](https://github.com/Tsurumaki-Kokoro/MintAPI)。
+
 ## 项目介绍
-本项目基于 FastAPI 框架，易于跨平台移植部署。解决机器人更换到新平台需要大量重写代码的问题。支持查询图片多主题自由切换，可自定义主题样式。
+本项目基于 FastAPI 框架，易于跨平台移植部署。解决机器人更换到新平台需要大量重写代码的问题。支持查询图片多主题自由切换，可自定义主题样式，支持多种osu!相关信息查询。
 
 部分功能的默认主题基于 [nonebot-plugin-osubot](https://github.com/yaowan233/nonebot-plugin-osubot)、[osuv2](https://github.com/Yuri-YuzuChaN/osuv2) 修改而来。
 
